@@ -8,7 +8,6 @@ import ProductHowItWorks from "../components/modules/views/ProductHowItWorks";
 import ProductCTA from "../components/modules/views/ProductCTA";
 import AppAppBar from "../components/modules/views/AppAppBar";
 import withRoot from "../components/modules/withRoot";
-import { withApollo } from "../lib/withApollo";
 
 function Index() {
   return (
@@ -25,4 +24,4 @@ function Index() {
   );
 }
 
-export default withApollo()(withRoot(Index));
+export default withRoot(Index);
