@@ -1,33 +1,31 @@
-// import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql } from "@apollo/client";
+import { GET_TRIP_FOR_SLUG_QUERY, GET_SLUGS_QUERY } from "../../utils/graphql/queries";
+import client from "../../utils/apollo-client";
 
-// export const TripDetails = () => {
-//   return <div></div>;
-// };
-// export const getStaticPaths = async () => {
-//   const resp = await fetch("All slugs");
-//   const client = graphqlClient(); //
-//   const { data } = await client.query({ query: YOUR_QUERY });
-//   return {
-//     paths,
-//     fallback: false,
-//   };
-// };
-// export const getStaticProps = async (context) => {
-//   const id = context.paths;
-//   const client = graphqlClient(); //
-//   const { data } = await client.query({ query: YOUR_QUERY });
-
-//   return {
-//     props: { trip: data },
-//   };
-// };
-// const GET_MY_TODOS = gql`
-//   query getMyTodos {
-//     todos(where: { is_public: { _eq: false } }, order_by: { created_at: desc }) {
-//       id
-//       title
-//       created_at
-//       is_completed
-//     }
-//   }
-// `;
+const TripDetails = () => {
+  return <div></div>;
+};
+export const getStaticProps = async ({ params }) => {
+  console.log(params.slug);
+  const { data } = await client.query({
+    query: GET_TRIP_FOR_SLUG_QUERY,
+    variables: { slug: params.slug },
+  });
+  console.log(data);
+  return {
+    props: {
+      trip: data.trip,
+    },
+  };
+};
+export async function getStaticPaths() {
+  const { data } = await client.query({
+    query: GET_SLUGS_QUERY,
+  });
+  //console.log(data.trip[0]);
+  return {
+    paths: [{ params: { slug: data.trip[0].slug } }],
+    fallback: false,
+  };
+}
+export default TripDetails;

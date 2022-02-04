@@ -6,12 +6,14 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { createEmotionCache } from "../utils/create-emotion-cache";
 import { theme } from "../theme";
+import { ApolloProvider } from "@apollo/client";
+import { useApollo } from "../lib/apolloClient";
 
 const clientSideEmotionCache = createEmotionCache();
 
 const App = (props) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
-
+  const apolloClient = useApollo(pageProps);
   const getLayout = Component.getLayout ?? ((page) => page);
 
   return (
@@ -23,7 +25,9 @@ const App = (props) => {
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          {getLayout(<Component {...pageProps} />)}
+          <ApolloProvider client={apolloClient}>
+            {getLayout(<Component {...pageProps} />)}
+          </ApolloProvider>
         </ThemeProvider>
       </LocalizationProvider>
     </CacheProvider>
