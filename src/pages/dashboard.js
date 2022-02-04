@@ -13,7 +13,7 @@ import { DashboardLayout } from "../components/dashboard-layout";
 const Dashboard = () => (
   <>
     <Head>
-      <title>Dashboard | Material Kit</title>
+      <title>FindYourTrip | Dashboard</title>
     </Head>
     <Box
       component="main"

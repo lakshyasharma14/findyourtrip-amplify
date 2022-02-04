@@ -8,11 +8,12 @@ import { createEmotionCache } from "../utils/create-emotion-cache";
 import { theme } from "../theme";
 import { ApolloProvider } from "@apollo/client";
 import { useApollo } from "../lib/apolloClient";
+import { Provider } from "next-auth/client";
 
 const clientSideEmotionCache = createEmotionCache();
 
 const App = (props) => {
-  const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
+  const { Component, emotionCache = clientSideEmotionCache, pageProps, session } = props;
   const apolloClient = useApollo(pageProps);
   const getLayout = Component.getLayout ?? ((page) => page);
 
@@ -25,9 +26,11 @@ const App = (props) => {
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <ApolloProvider client={apolloClient}>
-            {getLayout(<Component {...pageProps} />)}
-          </ApolloProvider>
+          <Provider session={session}>
+            <ApolloProvider client={apolloClient}>
+              {getLayout(<Component {...pageProps} />)}
+            </ApolloProvider>
+          </Provider>
         </ThemeProvider>
       </LocalizationProvider>
     </CacheProvider>
