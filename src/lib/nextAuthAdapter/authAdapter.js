@@ -8,133 +8,106 @@ import {
   GET_USER_BY_EMAIL,
   UPDATE_USER,
   DELETE_USER,
+  INSERT_ACCOUNT,
 } from "./queries";
 
-export default function AuthAdapter(client) {
+export default function AuthAdapter(client, options = {}) {
   return {
-    async getAdapter({ session, secret, ...appOptions }) {
-      return {
-        displayName: "APOLLO",
-        createUser(profile) {
-          console.log("---create uset-----" + JSON.stringify(client));
-          return client.query({
-            query: INSERT_USER,
-            variables: {
-              user: {
-                name: profile.name,
-                email: profile.email,
-                image: profile.image,
-                emailVerified: profile.emailVerified?.toISOString() ?? null,
-                roles: "user",
-                ...profile,
-              },
-            },
-          });
+    async createUser(user) {
+      const { data } = await client.mutate({
+        mutation: INSERT_USER,
+        variables: {
+          object: {
+            name: user.name,
+            email: user.email,
+            image: user.image,
+            email_verified: user.emailVerified?.toISOString() ?? null,
+            roles: "user",
+          },
         },
-
-        getUser(id) {
-          if (!id) return Promise.resolve(null);
-          return client.query({
-            query: GET_USER_BY_ID,
-            variables: { id: id },
-          });
+      });
+      return data.insert_users_one;
+    },
+    async getUser(id) {
+      if (!id) return Promise.resolve(null);
+      const { data } = await client.query({
+        query: GET_USER_BY_ID,
+        variables: { id: id },
+      });
+      return data.users[0];
+    },
+    async getUserByEmail(email) {
+      if (!email) return Promise.resolve(null);
+      const { data } = await client.query({
+        query: GET_USER_BY_EMAIL,
+        variables: { email },
+      });
+      return data.users[0];
+    },
+    async getUserByAccount({ providerAccountId, provider }) {
+      const { data } = await client.query({
+        query: GET_USER_BY_PROVIDER,
+        variables: { provider: provider, provider_account_id: providerAccountId },
+      });
+      return data.accounts[0]?.user;
+    },
+    async updateUser(user) {
+      return await client.mutate({
+        mutation: UPDATE_USER,
+        variables: {
+          object: {
+            name: user.name,
+            email: user.email,
+            image: user.image,
+            email_verified: user.emailVerified?.toISOString() ?? null,
+            roles: "user",
+            ...user,
+          },
         },
-
-        getUserByEmail(email) {
-          if (!email) return Promise.resolve(null);
-          return client.query({
-            query: GET_USER_BY_EMAIL,
-            variables: { email: email },
-          });
+      });
+    },
+    async deleteUser(userId) {
+      return await client.mutate({ mutation: DELETE_USER, variables: { id: id } });
+    },
+    async linkAccount(account) {
+      return await client.mutate({
+        mutation: INSERT_ACCOUNT,
+        variables: {
+          object: {
+            user_id: account.userId,
+            provider: account.provider,
+            type: account.type,
+            provider_account_id: account.providerAccountId,
+            refresh_token: "",
+            access_token: account.access_token,
+            expires_at: account.expires_at,
+          },
         },
-
-        async getUserByProviderAccountId(providerId, providerAccountId) {
-          return client.query({
-            query: GET_USER_BY_PROVIDER,
-            variables: { provider_id: providerId, provider_account_id: providerAccountId },
-          });
-        },
-
-        updateUser(user) {
-          return client.query({
-            query: UPDATE_USER,
-            variables: {
-              user: {
-                name: user.name,
-                email: user.email,
-                image: user.image,
-                emailVerified: user.emailVerified?.toISOString() ?? null,
-                roles: "user",
-                ...profile,
-              },
-            },
-          });
-        },
-
-        async deleteUser(userId) {
-          await client.query({ query: DELETE_USER, variables: { id: id } });
-        },
-
-        async linkAccount(
-          userId,
-          providerId,
-          providerType,
-          providerAccountId,
-          refreshToken,
-          accessToken,
-          accessTokenExpires
-        ) {
-          await client.query({
-            query: INSERT_ACCOUNT,
-            variables: {
-              account: {
-                userId,
-                providerId,
-                providerType,
-                providerAccountId,
-                refreshToken,
-                accessToken,
-                accessTokenExpires,
-              },
-            },
-          });
-        },
-
-        async unlinkAccount(_, providerId, providerAccountId) {
-          await client.query({
-            query: DELETE_ACCOUNT_FOR_PROVIDER,
-            variables: { provider_id: providerId, provider_account_id: providerAccountId },
-          });
-        },
-
-        createSession(user) {
-          return;
-        },
-
-        async getSession(sessionToken) {
-          return;
-        },
-
-        async updateSession(session, force) {
-          return;
-        },
-
-        async deleteSession(sessionToken) {
-          return;
-        },
-
-        async createVerificationRequest(identifier, url, token, _, provider) {
-          return;
-        },
-
-        async getVerificationRequest(identifier, token) {
-          return;
-        },
-
-        async deleteVerificationRequest(identifier, token) {
-          return;
-        },
-      };
+      });
+    },
+    async unlinkAccount({ providerAccountId, provider }) {
+      return await client.mutate({
+        mutation: DELETE_ACCOUNT_FOR_PROVIDER,
+        variables: { provider: providerId, provider_account_id: providerAccountId },
+      });
+    },
+    async createSession({ sessionToken, userId, expires }) {
+      return;
+    },
+    async getSessionAndUser(sessionToken) {
+      return;
+    },
+    async updateSession({ sessionToken }) {
+      return;
+    },
+    async deleteSession(sessionToken) {
+      return;
+    },
+    async createVerificationToken({ identifier, expires, token }) {
+      return;
+    },
+    async useVerificationToken({ identifier, token }) {
+      return;
     },
   };
 }

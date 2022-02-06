@@ -12,7 +12,6 @@ export async function getStaticProps() {
   const { data } = await client.query({
     query: GET_SLUGS_QUERY,
   });
-  //console.log(data.trip[0]);
   return {
     props: {
       trip: data.trip,

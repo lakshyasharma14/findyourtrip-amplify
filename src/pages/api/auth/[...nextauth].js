@@ -4,6 +4,9 @@ import GithubProvider from "next-auth/providers/github";
 import jwt from "jsonwebtoken";
 import AuthAdapter from "../../../lib/nextAuthAdapter/authAdapter";
 import client from "../../../utils/apollo-client";
+import { EncryptJWT, jwtDecrypt } from "jose";
+import { v4 as uuid } from "uuid";
+import hkdf from "@panva/hkdf";
 
 // import AppleProvider from "next-auth/providers/apple"
 // import EmailProvider from "next-auth/providers/email"
@@ -57,14 +60,20 @@ export default NextAuth({
     // }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
-  session: { jwt: true },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
+
+    updateAge: 24 * 60 * 60,
+  },
   jwt: {
     secret: process.env.NEXTAUTH_SECRET,
     maxAge: 10 * 60,
-    encode: async ({ secret, token, maxAge }) => {
-      if (token.id === undefined) return;
+    encode: async ({ token, secret, maxAge }) => {
+      if (!token) return null;
       const jwtClaims = {
-        sub: token.id.toString(),
+        state: token.state,
+        sub: token.id,
         name: token.name,
         email: token.email,
         iat: Date.now() / 1000,
@@ -80,9 +89,9 @@ export default NextAuth({
       const encodedToken = jwt.sign(jwtClaims, secret, { algorithm: "HS256" });
       return encodedToken;
     },
-    decode: async ({ secret, token, maxAge }) => {
-      const decodedToken = jwt.verify(token, secret, { algorithms: "HS256" });
-      return decodedToken;
+    decode: async ({ secret, token }) => {
+      if (!token) return null;
+      return jwt.verify(token, secret, { algorithm: "HS256" });
     },
   },
   theme: {
@@ -93,26 +102,26 @@ export default NextAuth({
     async redirect({ url, baseUrl }) {
       return "/dashboard";
     },
-    async session(session, token) {
+    async session({ session, token, user }) {
       const encodedToken = jwt.sign(token, process.env.NEXTAUTH_SECRET, {
         algorithm: "HS256",
       });
       session.id = token.id;
       session.token = encodedToken;
-      return Promise.resolve(session);
+      return session;
     },
-    async jwt(token, user, account, profile, isNewUser) {
+    async jwt({ token, user, account, profile, isNewUser }) {
       const isUserSignedIn = user ? true : false;
       if (isUserSignedIn) {
         console.log("---user-----" + JSON.stringify(user));
         console.log("---profile-----" + JSON.stringify(profile));
         console.log("---token-----" + JSON.stringify(token));
 
-        token.id = user.id.toString();
+        token.id = user.id;
       }
-      return Promise.resolve(token);
+      return token;
     },
   },
   adapter: AuthAdapter(client),
-  debug: false,
+  debug: true,
 });
