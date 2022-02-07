@@ -5,29 +5,31 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Box, Button, Container, Grid, Link, TextField, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { Facebook as FacebookIcon } from "../icons/facebook";
-import { Google as GoogleIcon } from "../icons/google";
+import { Facebook as FacebookIcon } from "../../icons/facebook";
+import { Google as GoogleIcon } from "../../icons/google";
+import { getSession, signIn, getCsrfToken, getProviders } from "next-auth/react";
 
-const Login = () => {
+const Signin = ({ providers, csrfToken }) => {
   const router = useRouter();
   const formik = useFormik({
     initialValues: {
-      email: "demo@devias.io",
-      password: "Password123",
+      csrfToken: csrfToken,
+      email: "test@test.com",
+      password: "test",
     },
     validationSchema: Yup.object({
       email: Yup.string().email("Must be a valid email").max(255).required("Email is required"),
       password: Yup.string().max(255).required("Password is required"),
     }),
     onSubmit: () => {
-      router.push("/dashboard");
+      router.push("/api/auth/signin/email");
     },
   });
 
   return (
     <>
       <Head>
-        <title>Login | Material Kit</title>
+        <title>FindYourTrip | Signin</title>
       </Head>
       <Box
         component="main"
@@ -59,7 +61,7 @@ const Login = () => {
                   color="info"
                   fullWidth
                   startIcon={<FacebookIcon />}
-                  onClick={formik.handleSubmit}
+                  onClick={signIn("github")}
                   size="large"
                   variant="contained"
                 >
@@ -71,7 +73,7 @@ const Login = () => {
                   fullWidth
                   color="error"
                   startIcon={<GoogleIcon />}
-                  onClick={formik.handleSubmit}
+                  onClick={signIn("google")}
                   size="large"
                   variant="contained"
                 >
@@ -149,4 +151,26 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signin;
+
+export async function getServerSideProps(context) {
+  const { req, res } = context;
+  const session = await getSession({ req });
+
+  if (session) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/dashboard",
+      },
+      props: {},
+    };
+  }
+
+  return {
+    props: {
+      providers: await getProviders(context),
+      csrfToken: await getCsrfToken(context),
+    },
+  };
+}

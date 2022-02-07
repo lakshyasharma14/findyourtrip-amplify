@@ -6,7 +6,7 @@ import Typography from "../components/modules/components/Typography";
 import AppAppBar from "../components/modules/views/AppAppBar";
 import AppFooter from "../components/modules/views/AppFooter";
 import withRoot from "../components/modules/withRoot";
-import terms from "../modules/views/terms.md";
+// import terms from "../components/modules/views/terms.md";
 
 function Terms() {
   return (
@@ -17,7 +17,7 @@ function Terms() {
           <Typography variant="h3" gutterBottom marked="center" align="center">
             Terms
           </Typography>
-          <Markdown>{terms}</Markdown>
+          {/* <Markdown>{terms}</Markdown> */}
         </Box>
       </Container>
       <AppFooter />

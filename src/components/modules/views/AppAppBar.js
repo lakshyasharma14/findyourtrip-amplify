@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import AppBar from "../components/AppBar";
 import Toolbar from "../components/Toolbar";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 const rightLink = {
   fontSize: 16,
@@ -10,6 +11,8 @@ const rightLink = {
 };
 
 function AppAppBar() {
+  const { data: session, status } = useSession();
+
   return (
     <div>
       <AppBar position="fixed">
@@ -19,17 +22,28 @@ function AppAppBar() {
             {"onepirate"}
           </Link>
           <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
-            <Link color="inherit" variant="h6" underline="none" href="/login/" sx={rightLink}>
-              {"Sign In"}
-            </Link>
-            <Link
-              variant="h6"
-              underline="none"
-              href="/register/"
-              sx={{ ...rightLink, color: "secondary.main" }}
-            >
-              {"Sign Up"}
-            </Link>
+            (
+            {status === "unauthenticated" && (
+              <Link
+                color="inherit"
+                variant="h6"
+                underline="none"
+                href="/auth/signin/"
+                sx={rightLink}
+              >
+                {"Sign In"}
+              </Link>
+            )}
+            {status === "authenticated" && (
+              <Link
+                variant="h6"
+                underline="none"
+                onClick={() => signOut({ callbackUrl: "/" })}
+                sx={{ ...rightLink, color: "secondary.main" }}
+              >
+                {"Sign Out"}
+              </Link>
+            )}
           </Box>
         </Toolbar>
       </AppBar>

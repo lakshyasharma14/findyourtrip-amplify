@@ -7,7 +7,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { createEmotionCache } from "../utils/create-emotion-cache";
 import { theme } from "../theme";
 import { ApolloProvider } from "@apollo/client";
-import { useApollo } from "../lib/apolloClient";
+import { useApollo } from "../lib/apollo/apolloClient";
 import { SessionProvider } from "next-auth/react";
 
 const clientSideEmotionCache = createEmotionCache();
@@ -26,7 +26,7 @@ const App = (props) => {
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <SessionProvider session={session}>
+          <SessionProvider session={pageProps.session}>
             <ApolloProvider client={apolloClient} refetchInterval={5 * 60}>
               {getLayout(<Component {...pageProps} />)}
             </ApolloProvider>

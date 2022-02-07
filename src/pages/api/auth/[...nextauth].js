@@ -3,11 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import jwt from "jsonwebtoken";
 import AuthAdapter from "../../../lib/nextAuthAdapter/authAdapter";
-import client from "../../../utils/apollo-client";
-import { EncryptJWT, jwtDecrypt } from "jose";
-import { v4 as uuid } from "uuid";
-import hkdf from "@panva/hkdf";
-
+import client from "../../../lib/apollo/apolloServerClient";
 // import AppleProvider from "next-auth/providers/apple"
 // import EmailProvider from "next-auth/providers/email"
 
@@ -113,10 +109,6 @@ export default NextAuth({
     async jwt({ token, user, account, profile, isNewUser }) {
       const isUserSignedIn = user ? true : false;
       if (isUserSignedIn) {
-        console.log("---user-----" + JSON.stringify(user));
-        console.log("---profile-----" + JSON.stringify(profile));
-        console.log("---token-----" + JSON.stringify(token));
-
         token.id = user.id;
       }
       return token;
@@ -124,4 +116,7 @@ export default NextAuth({
   },
   adapter: AuthAdapter(client),
   debug: true,
+  pages: {
+    signIn: "/auth/signin",
+  },
 });

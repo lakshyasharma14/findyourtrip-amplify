@@ -1,5 +1,5 @@
 import { GET_SLUGS_QUERY } from "../utils/graphql/queries";
-import client from "../utils/apollo-client";
+import client from "../lib/apollo/apolloServerClient";
 
 const Trip = (props) => {
   return (

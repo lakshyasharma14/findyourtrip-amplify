@@ -1,6 +1,6 @@
 import { useQuery, gql } from "@apollo/client";
 import { GET_TRIP_FOR_SLUG_QUERY, GET_SLUGS_QUERY } from "../../utils/graphql/queries";
-import client from "../../utils/apollo-client";
+import client from "../../lib/apollo/apolloServerClient";
 
 const TripDetails = () => {
   return <div></div>;
